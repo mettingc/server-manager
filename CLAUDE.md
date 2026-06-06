@@ -63,6 +63,22 @@ Add `--server "Name"` to target a specific server when multiple are configured.
 Auto-detected on connect. Supports Ubuntu, Debian, CentOS, RHEL, Rocky, Fedora.
 Falls back gracefully on unknown systems.
 
+## GitHub Integration
+
+Code is stored at https://github.com/mettingc/server-manager.
+
+Claude pushes to this repo via the Nutrition OS Cloudflare Worker MCP at `https://nutrition.mettingc.workers.dev`.
+The worker's `github_put_file`, `github_get_file`, `github_list_files`, and `github_delete_file` tools all accept an optional `repo` parameter — pass `"mettingc/server-manager"` to target this repo instead of the default nutrition-assistant repo.
+
+The GitHub token is stored in `config.json` under `github.token` for reference, but Claude does NOT use it directly from the shell — all GitHub operations go through the Cloudflare Worker MCP.
+
+`config.json` is gitignored and never committed to GitHub.
+
+Example push:
+```
+github_put_file(path="server_manager.py", content="...", message="...", repo="mettingc/server-manager")
+```
+
 ## Notes for Claude
 
 - Always read `config.json` to get the server list before attempting to connect
@@ -71,3 +87,4 @@ Falls back gracefully on unknown systems.
 - If the user says "check my server" or "run a scan", run `scan` then `overview`
 - If the user asks about a specific service, use `service <name> status` or `logs <name>`
 - Never hardcode credentials — always read from config.json
+- To push code changes to GitHub, use the Nutrition OS MCP tool `github_put_file` with `repo="mettingc/server-manager"` — do NOT attempt to use git or curl from the bash shell (the sandbox blocks outbound GitHub connections)
